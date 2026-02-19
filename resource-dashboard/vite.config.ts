@@ -8,7 +8,9 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
-  base: './', // Relative asset paths for portable serving
+  // base is set via CLI flag for GitHub Pages builds
+  // Default './' works for local dev and portable package
+  base: process.env.GITHUB_ACTIONS ? '/resource-dashboard/' : './',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
