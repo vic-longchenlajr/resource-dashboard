@@ -18,7 +18,8 @@ FIRST TIME SETUP:
 REQUIREMENTS:
   - Windows 10 or later
   - Chrome, Edge, or Firefox browser
-  - No installation required
+  - PowerShell 5.1+ (included with Windows 10)
+  - No installation or admin privileges required
 
 NOTES:
   - Data is stored in your browser's local
@@ -30,7 +31,11 @@ NOTES:
 TROUBLESHOOTING:
   - If the browser doesn't open, manually go
     to http://localhost:4173
-  - If you see "port already in use", run
-    "Stop Dashboard.bat" first, then try again
-  - Make sure you're using a modern browser
-    (Chrome, Edge, or Firefox)
+  - If you see a PowerShell security prompt,
+    it is safe — the script only serves files
+    from the app folder on localhost
+  - If port 4173 is in use, run Stop Dashboard.bat
+    first, then try again
+  - If the dashboard doesn't start, make sure
+    PowerShell is available (type "powershell"
+    in Start menu to verify)

@@ -61,16 +61,13 @@ mkdir package\docs
 :: Copy built app (exclude lp-exports from app folder)
 xcopy /s /e /q /i dist\* package\app\ /exclude:scripts\package-exclude.txt
 
-:: Copy server binary
-if exist "server\serve.exe" (
-    copy server\serve.exe package\server\ >nul
-    echo   serve.exe copied
+:: Copy server script
+if exist "server\server.ps1" (
+    copy server\server.ps1 package\server\ >nul
+    echo   server.ps1 copied
 ) else (
     echo.
-    echo   WARNING: server\serve.exe not found!
-    echo   Download miniserve from:
-    echo   https://github.com/svenstaro/miniserve/releases
-    echo   and place it at server\serve.exe
+    echo   WARNING: server\server.ps1 not found!
     echo.
 )
 

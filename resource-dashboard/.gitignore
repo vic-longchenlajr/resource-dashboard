@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Server binary (replaced by server.ps1)
+server/serve.exe
