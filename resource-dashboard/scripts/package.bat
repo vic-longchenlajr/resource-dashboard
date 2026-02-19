@@ -7,14 +7,9 @@ echo.
 
 cd /d "%~dp0\.."
 
-:: Release directories (parent of resource-dashboard)
+:: Release directory (parent of resource-dashboard)
 set "RELEASE_DIR=..\release"
-set "LATEST_DIR=%RELEASE_DIR%\latest"
-set "HISTORY_DIR=%RELEASE_DIR%\history"
-
-:: Ensure release directories exist
-if not exist "%LATEST_DIR%" mkdir "%LATEST_DIR%"
-if not exist "%HISTORY_DIR%" mkdir "%HISTORY_DIR%"
+if not exist "%RELEASE_DIR%" mkdir "%RELEASE_DIR%"
 
 :: Read version from package.json
 for /f "tokens=2 delims=:, " %%a in ('findstr /c:"\"version\"" package.json') do set RAW_VER=%%~a
@@ -22,9 +17,9 @@ set "VERSION=%RAW_VER:"=%"
 set "ZIP_NAME=resource-dashboard-%VERSION%.zip"
 
 :: Check if this version was already built
-if exist "%HISTORY_DIR%\%ZIP_NAME%" (
+if exist "%RELEASE_DIR%\%ZIP_NAME%" (
     echo  Current version: %VERSION%
-    echo  WARNING: v%VERSION% already exists in release\history.
+    echo  WARNING: v%VERSION% already exists in release.
     echo.
     echo  Enter a new version number, or press Enter to rebuild %VERSION% anyway.
     echo.
@@ -48,7 +43,7 @@ echo  Version: %VERSION%
 echo.
 
 :: Build the app
-echo [1/5] Building app...
+echo [1/4] Building app...
 call npm run build
 if %errorlevel% neq 0 (
     echo Build failed!
@@ -56,7 +51,7 @@ if %errorlevel% neq 0 (
 )
 
 :: Stage the package
-echo [2/5] Staging package...
+echo [2/4] Staging package...
 if exist "package" rmdir /s /q package
 mkdir package
 mkdir package\server
@@ -67,7 +62,6 @@ mkdir package\docs
 xcopy /s /e /q /i dist\* package\app\ /exclude:scripts\package-exclude.txt
 
 :: Copy server binary
-echo [3/5] Copying server binary...
 if exist "server\serve.exe" (
     copy server\serve.exe package\server\ >nul
     echo   serve.exe copied
@@ -86,26 +80,52 @@ copy scripts\Stop_Dashboard.bat package\ >nul
 copy scripts\README.txt package\ >nul
 copy scripts\Quick_Start_Guide.txt package\docs\ >nul
 
-:: Archive to history as zip
-echo [4/5] Archiving to release\history\%ZIP_NAME%...
-powershell -command "Compress-Archive -Path 'package\*' -DestinationPath '%HISTORY_DIR%\%ZIP_NAME%' -Force"
+:: Zip into release folder
+echo [3/4] Packaging to release\%ZIP_NAME%...
+powershell -command "Compress-Archive -Path 'package\*' -DestinationPath '%RELEASE_DIR%\%ZIP_NAME%' -Force"
 
-:: Deploy to latest (replace contents)
-echo [5/5] Deploying to release\latest...
-if exist "%LATEST_DIR%" rmdir /s /q "%LATEST_DIR%"
-mkdir "%LATEST_DIR%"
-xcopy /s /e /q /i package\* "%LATEST_DIR%\"
+:: Copy README alongside the zip
+copy scripts\README.txt "%RELEASE_DIR%\README.txt" >nul
 
 :: Clean up staging
 rmdir /s /q package
+
+:: Publish GitHub Release
+echo [4/4] Publishing GitHub Release...
+where gh >nul 2>&1
+if %errorlevel% equ 0 (
+    cd /d "%~dp0\..\.."
+    gh release view v!VERSION! >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo   Updating existing release v!VERSION!...
+        gh release upload v!VERSION! "release\!ZIP_NAME!" --clobber
+    ) else (
+        echo   Creating release v!VERSION!...
+        gh release create v!VERSION! "release\!ZIP_NAME!" --title "Resource Dashboard v!VERSION!" --notes "Download the zip, extract it, and double-click Start_Dashboard.bat."
+    )
+    if !errorlevel! equ 0 (
+        echo   Release published!
+        for /f "tokens=*" %%u in ('gh release view v!VERSION! --json assets --jq ".assets[0].url"') do set "DOWNLOAD_URL=%%u"
+        if defined DOWNLOAD_URL (
+            echo.
+            echo   Download: !DOWNLOAD_URL!
+        )
+    ) else (
+        echo   WARNING: GitHub release failed. You can publish manually with:
+        echo   gh release create v!VERSION! "release\!ZIP_NAME!"
+    )
+    cd /d "%~dp0\.."
+) else (
+    echo   GitHub CLI (gh) not found - skipping release publish.
+    echo   Install from: https://cli.github.com
+)
 
 echo.
 echo ====================================
 echo  Build complete!  v%VERSION%
 echo ====================================
 echo.
-echo  Ready to run:  release\latest\Start_Dashboard.bat
-echo  Archived:      release\history\%ZIP_NAME%
-for %%A in ("%HISTORY_DIR%\%ZIP_NAME%") do echo  Archive size:  %%~zA bytes
+echo  Package:  release\%ZIP_NAME%
+for %%A in ("%RELEASE_DIR%\%ZIP_NAME%") do echo  Size:     %%~zA bytes
 echo.
 pause
