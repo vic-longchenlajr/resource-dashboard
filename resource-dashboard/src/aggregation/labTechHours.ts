@@ -14,7 +14,8 @@ import { resolveMonths, toDbMonths, fromDbMonth } from '../utils/monthRange';
  */
 export async function computeLabTechHours(
   monthFilter?: MonthFilter,
-  projectFilter?: string
+  projectFilter?: string,
+  engineerFilter?: string
 ): Promise<LabTechHoursSummary[]> {
   const teamMembers = await db.teamMembers.toArray();
 
@@ -35,7 +36,8 @@ export async function computeLabTechHours(
   const labEntries = timesheets.filter(
     t => engineers.has(t.full_name) &&
       t.activity === ActivityType.LabTesting &&
-      (!projectFilter || getProjectParent(t.r_number) === projectFilter || t.r_number === projectFilter)
+      (!projectFilter || getProjectParent(t.r_number) === projectFilter || t.r_number === projectFilter) &&
+      (!engineerFilter || t.full_name === engineerFilter)
   );
 
   // Group by (month, engineer)

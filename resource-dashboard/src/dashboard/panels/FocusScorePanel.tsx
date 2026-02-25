@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { computeFocusScore } from '../../aggregation/engine';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 import {
   BarChart,
   Bar,
@@ -20,7 +20,7 @@ function focusColor(score: number): string {
 }
 
 export function FocusScorePanel() {
-  const { monthFilter, selectedProject } = useMonthFilter();
+  const { monthFilter, selectedProject } = useFilters();
 
   const focusData = useLiveQuery(async () => {
     if (!monthFilter) return null;

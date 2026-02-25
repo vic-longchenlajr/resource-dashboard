@@ -15,10 +15,10 @@ import {
 } from 'recharts';
 import { CATEGORY_COLORS, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE, LEGEND_STYLE, CHART_MARGINS } from '../../charts/ChartTheme';
 import { formatMonth } from '../../utils/format';
+import { useFilters } from '../../context/ViewFilterContext';
 
 export function ProjectBurndownPanel() {
-  const config = useLiveQuery(() => db.config.get(1));
-  const selectedProject = config?.selected_project;
+  const { selectedProject } = useFilters();
 
   const timeline = useLiveQuery(async () => {
     if (!selectedProject) return null;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { computeBusFactorRisk } from '../../aggregation/engine';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 import { ProjectType } from '../../types';
 import type { BusFactorResult } from '../../aggregation/busFactor';
 
@@ -14,7 +14,7 @@ const RISK_STYLES: Record<BusFactorResult['riskLevel'], { bg: string; text: stri
 
 export function BusFactorPanel() {
   const [npdOnly, setNpdOnly] = useState(false);
-  const { monthFilter, selectedProject } = useMonthFilter();
+  const { monthFilter, selectedProject } = useFilters();
 
   const busData = useLiveQuery(async () => {
     if (!monthFilter) return null;

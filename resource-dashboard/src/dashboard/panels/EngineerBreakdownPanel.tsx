@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/database';
 import { computeActualHours } from '../../aggregation/engine';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 import {
   BarChart,
   Bar,
@@ -16,7 +16,7 @@ import {
 import { CATEGORY_COLORS, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE, LEGEND_STYLE, CHART_MARGINS, CHART_ROW_HEIGHT, CHART_MIN_HEIGHT, CHART_MAX_HEIGHT, truncatedYAxisTick } from '../../charts/ChartTheme';
 
 export function EngineerBreakdownPanel() {
-  const { monthFilter, selectedProject } = useMonthFilter();
+  const { monthFilter, selectedProject } = useFilters();
   const config = useLiveQuery(() => db.config.get(1));
   const capacity = config?.std_monthly_capacity_hours ?? 140;
 

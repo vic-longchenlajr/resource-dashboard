@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { computeLabTechHours, computeActualHours } from '../../aggregation/engine';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 import {
   BarChart,
   Bar,
@@ -15,7 +15,7 @@ import { CATEGORY_COLORS, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE, CHART_MARGINS, 
 import { formatHours } from '../../utils/format';
 
 export function LabTechHoursPanel() {
-  const { monthFilter, selectedProject } = useMonthFilter();
+  const { monthFilter, selectedProject } = useFilters();
 
   const labTechHours = useLiveQuery(async () => {
     if (!monthFilter) return null;

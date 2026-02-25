@@ -1,10 +1,10 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { computeTechAffinity } from '../../aggregation/engine';
 import { formatHours } from '../../utils/format';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 
 export function TechAffinityPanel() {
-  const { monthFilter, selectedProject } = useMonthFilter();
+  const { monthFilter, selectedProject } = useFilters();
 
   const affinityData = useLiveQuery(async () => {
     if (!monthFilter) return null;

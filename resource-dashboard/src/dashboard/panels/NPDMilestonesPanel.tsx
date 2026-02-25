@@ -3,10 +3,10 @@ import { db } from '../../db/database';
 import { ProjectType } from '../../types';
 import { getProjectParent } from '../../aggregation/projectUtils';
 import { milestoneColor } from '../../charts/ChartTheme';
+import { useFilters } from '../../context/ViewFilterContext';
 
 export function NPDMilestonesPanel() {
-  const config = useLiveQuery(() => db.config.get(1));
-  const selectedProject = config?.selected_project || undefined;
+  const { selectedProject } = useFilters();
 
   const projects = useLiveQuery(() =>
     db.projects.where('type').equals(ProjectType.NPD).toArray()

@@ -6,11 +6,11 @@ import { skillColor } from '../../charts/ChartTheme';
 import { PersonRole, ProjectType } from '../../types';
 import { getProjectParent } from '../../aggregation/projectUtils';
 import { computeCompatibilityScores } from '../../aggregation/skillMatching';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 import { resolveMonths, toDbMonths } from '../../utils/monthRange';
 
 export function SkillHeatmapPanel() {
-  const { monthFilter, selectedProject: dashboardProject } = useMonthFilter();
+  const { monthFilter, selectedProject: dashboardProject } = useFilters();
 
   const teamMembers = useLiveQuery(() => db.teamMembers.toArray());
   const skills = useLiveQuery(() => db.skills.toArray());

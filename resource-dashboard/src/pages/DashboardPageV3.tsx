@@ -1,20 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
-import {
-  computeMonthlyCategoryTotals,
-  computePlannedUtilization,
-} from '../aggregation/engine';
 import { DashboardHeader } from '../dashboard/DashboardHeader';
 import { PanelToggleDrawer } from '../dashboard/PanelToggleDrawer';
 import { PanelWrapper } from '../dashboard/PanelWrapper';
@@ -36,12 +22,12 @@ import { MeetingTaxPanel } from '../dashboard/panels/MeetingTaxPanel';
 import { AllocationCompliancePanel } from '../dashboard/panels/AllocationCompliancePanel';
 import { KPITrendPanel } from '../dashboard/panels/KPITrendPanel';
 import { CapacityForecastPanel } from '../dashboard/panels/CapacityForecastPanel';
-import { Heatmap } from '../charts/Heatmap';
+import { PlannedVsActualPanel } from '../dashboard/panels/PlannedVsActualPanel';
+import { FirefightingTrendPanel } from '../dashboard/panels/FirefightingTrendPanel';
+import { UtilizationHeatmapPanel } from '../dashboard/panels/UtilizationHeatmapPanel';
 import { usePanelConfig } from '../dashboard/hooks/usePanelConfig';
 import { usePanelAvailability } from '../hooks/usePanelAvailability';
 import { PanelErrorBoundary } from '../dashboard/PanelErrorBoundary';
-import { CATEGORY_COLORS, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE, LEGEND_STYLE, BAR_STYLE, CHART_MARGINS, utilizationColor } from '../charts/ChartTheme';
-import { formatPercent, formatMonth } from '../utils/format';
 
 // Panels that should span the full 2-column grid width
 const PANEL_FULL_WIDTH = new Set([
@@ -324,122 +310,6 @@ export function DashboardPageV3() {
         </div>
       )}
     </div>
-  );
-}
-
-function PlannedVsActualPanel() {
-  const config = useLiveQuery(() => db.config.get(1));
-  const selectedProject = config?.selected_project || undefined;
-
-  const categoryTotals = useLiveQuery(
-    () => computeMonthlyCategoryTotals(selectedProject),
-    [selectedProject]
-  );
-
-  if (!categoryTotals || categoryTotals.length === 0) {
-    return <div className="text-center py-12 text-[var(--text-muted)]">No timesheet data found. Import LiquidPlanner CSV files to populate this chart.</div>;
-  }
-
-  const chartData = categoryTotals.flatMap(month => [
-    {
-      month: `${formatMonth(month.month)} P`,
-      NPD: month.planned_npd,
-      Sustaining: month.planned_sustaining,
-      Sprint: month.planned_sprint,
-      type: 'planned',
-    },
-    {
-      month: `${formatMonth(month.month)} A`,
-      NPD: month.actual_npd,
-      Sustaining: month.actual_sustaining,
-      Sprint: month.actual_sprint,
-      type: 'actual',
-    },
-  ]);
-
-  return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={chartData} margin={CHART_MARGINS.vertical}>
-        <CartesianGrid {...GRID_STYLE} />
-        <XAxis dataKey="month" {...AXIS_STYLE} />
-        <YAxis {...AXIS_STYLE} width={48} label={{ value: 'Hours', angle: -90, position: 'insideLeft', offset: 8, style: { fontSize: 12, fill: '#64748b', fontWeight: 500 } }} />
-        <Tooltip {...TOOLTIP_STYLE} />
-        <Legend {...LEGEND_STYLE} />
-        <Bar dataKey="NPD" stackId="a" fill={CATEGORY_COLORS.npd} radius={BAR_STYLE.radius} />
-        <Bar dataKey="Sustaining" stackId="a" fill={CATEGORY_COLORS.sustaining} />
-        <Bar dataKey="Sprint" stackId="a" fill={CATEGORY_COLORS.sprint} />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
-
-function FirefightingTrendPanel() {
-  const config = useLiveQuery(() => db.config.get(1));
-  const selectedProject = config?.selected_project || undefined;
-
-  const categoryTotals = useLiveQuery(
-    () => computeMonthlyCategoryTotals(selectedProject),
-    [selectedProject]
-  );
-
-  if (!categoryTotals || categoryTotals.length === 0) {
-    return <div className="text-center py-12 text-[var(--text-muted)]">No timesheet data found. Import LiquidPlanner CSV files to populate this chart.</div>;
-  }
-
-  const chartData = categoryTotals.map(month => ({
-    month: formatMonth(month.month),
-    firefighting: month.actual_firefighting,
-  }));
-
-  return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={chartData} margin={CHART_MARGINS.vertical}>
-        <CartesianGrid {...GRID_STYLE} />
-        <XAxis dataKey="month" {...AXIS_STYLE} />
-        <YAxis {...AXIS_STYLE} width={48} label={{ value: 'Hours', angle: -90, position: 'insideLeft', offset: 8, style: { fontSize: 12, fill: '#64748b', fontWeight: 500 } }} />
-        <Tooltip {...TOOLTIP_STYLE} />
-        <Bar dataKey="firefighting" fill={CATEGORY_COLORS.firefighting} name="Firefighting Hours" radius={BAR_STYLE.radius} />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
-
-function UtilizationHeatmapPanel() {
-  const config = useLiveQuery(() => db.config.get(1));
-  const selectedProject = config?.selected_project || undefined;
-  const utilization = useLiveQuery(
-    () => computePlannedUtilization(selectedProject),
-    [selectedProject]
-  );
-
-  if (!utilization || utilization.length === 0) {
-    return (
-      <div className="text-center py-12 text-[var(--text-muted)]">
-        No planned utilization data. Configure in Settings &rarr; Resource Allocations
-      </div>
-    );
-  }
-
-  const engineers = [...new Set(utilization.map(u => u.engineer))].sort();
-  const months = [...new Set(utilization.map(u => u.month))].sort();
-
-  const dataMap = new Map<string, number>();
-  utilization.forEach(u => {
-    dataMap.set(`${u.engineer}|${u.month}`, u.utilization_pct);
-  });
-
-  const rows = engineers.map(e => ({ key: e, label: e }));
-  const columns = months.map(m => ({ key: m, label: formatMonth(m) }));
-
-  return (
-    <Heatmap
-      rows={rows}
-      columns={columns}
-      data={dataMap}
-      colorFn={utilizationColor}
-      formatFn={formatPercent}
-      emptyValue={0}
-    />
   );
 }
 

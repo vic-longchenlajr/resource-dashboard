@@ -13,12 +13,13 @@ import { resolveMonths, toDbMonths, fromDbMonth } from '../utils/monthRange';
  */
 export async function computeAllKPIs(
   month: MonthFilter,
-  projectFilter?: string
+  projectFilter?: string,
+  engineerFilter?: string
 ): Promise<KPIResults> {
   const months = resolveMonths(month);
 
   // ── Core data: one call each ──
-  const actualHours = await computeActualHours(month, projectFilter);
+  const actualHours = await computeActualHours(month, projectFilter, engineerFilter);
   const allCategoryTotals = await computeMonthlyCategoryTotals(projectFilter);
   // For multi-month, aggregate across all matching months
   const matchingTotals = allCategoryTotals.filter(t => months.includes(t.month));
@@ -98,6 +99,9 @@ export async function computeAllKPIs(
     timesheets = timesheets.filter(t =>
       t.r_number === projectFilter || getProjectParent(t.r_number) === projectFilter
     );
+  }
+  if (engineerFilter) {
+    timesheets = timesheets.filter(t => t.full_name === engineerFilter);
   }
   const engineerSet = new Set(
     teamMembers.filter(m => m.role === PersonRole.Engineer).map(m => m.full_name)
@@ -199,7 +203,8 @@ export async function computeAllKPIs(
  */
 export async function computeAllKPIsBatch(
   months: string[],
-  projectFilter?: string
+  projectFilter?: string,
+  _engineerFilter?: string
 ): Promise<Map<string, KPIResults>> {
   if (months.length === 0) return new Map();
 

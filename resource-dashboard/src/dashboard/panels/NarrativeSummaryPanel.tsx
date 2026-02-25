@@ -1,9 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { generateNarrativeSummary } from '../../aggregation/engine';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 
 export function NarrativeSummaryPanel() {
-  const { monthFilter, selectedMonth, selectedProject, isRange } = useMonthFilter();
+  const { monthFilter, selectedMonth, selectedProject, isRange } = useFilters();
 
   const narrative = useLiveQuery(async () => {
     // Narrative is single-month only — use selectedMonth

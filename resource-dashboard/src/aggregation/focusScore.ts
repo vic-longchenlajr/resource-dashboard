@@ -21,7 +21,7 @@ export interface FocusScoreResult {
  * Measures how fragmented each person's attention is across projects.
  * Focus Score = 100 / avg projects per day. Higher = more focused.
  */
-export async function computeFocusScore(month?: MonthFilter, projectFilter?: string): Promise<FocusScoreResult[]> {
+export async function computeFocusScore(month?: MonthFilter, projectFilter?: string, engineerFilter?: string): Promise<FocusScoreResult[]> {
   const teamMembers = await db.teamMembers.toArray();
   const memberMap = new Map(teamMembers.map(m => [m.full_name, m]));
 
@@ -37,6 +37,10 @@ export async function computeFocusScore(month?: MonthFilter, projectFilter?: str
         .map(t => t.full_name)
     );
     timesheets = timesheets.filter(t => projectPeople.has(t.full_name));
+  }
+
+  if (engineerFilter) {
+    timesheets = timesheets.filter(t => t.full_name === engineerFilter);
   }
 
   if (timesheets.length === 0) return [];

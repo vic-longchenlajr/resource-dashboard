@@ -19,7 +19,7 @@ export interface MeetingTaxResult {
  * Breaks out meeting hours as a separate category from general admin.
  * Meeting tasks are identified by "meeting" in the task name (case-insensitive).
  */
-export async function computeMeetingTax(month?: MonthFilter, projectFilter?: string): Promise<MeetingTaxResult[]> {
+export async function computeMeetingTax(month?: MonthFilter, projectFilter?: string, engineerFilter?: string): Promise<MeetingTaxResult[]> {
   const teamMembers = await db.teamMembers.toArray();
   const memberMap = new Map(teamMembers.map(m => [m.full_name, m]));
 
@@ -35,6 +35,10 @@ export async function computeMeetingTax(month?: MonthFilter, projectFilter?: str
         .map(t => t.full_name)
     );
     timesheets = timesheets.filter(t => projectPeople.has(t.full_name));
+  }
+
+  if (engineerFilter) {
+    timesheets = timesheets.filter(t => t.full_name === engineerFilter);
   }
 
   if (timesheets.length === 0) return [];

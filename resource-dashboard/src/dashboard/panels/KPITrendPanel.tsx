@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/database';
+import { useFilters } from '../../context/ViewFilterContext';
 import { useKPIHistory } from '../../hooks/useKPIHistory';
 import { KPI_REGISTRY, formatKPIValue } from '../../aggregation/kpiRegistry';
 import type { KPIFormat } from '../../aggregation/kpiRegistry';
@@ -93,9 +94,8 @@ function formatCurrentValue(value: number, format: KPIFormat): string {
 // ── Main Panel ──
 
 export function KPITrendPanel() {
+  const { selectedMonth, selectedProject } = useFilters();
   const config = useLiveQuery(() => db.config.get(1));
-  const selectedMonth = config?.selected_month;
-  const selectedProject = config?.selected_project || undefined;
   const kpiCards: KPICardKey[] = config?.kpi_cards ?? DEFAULT_KPI_CARDS;
 
   const history = useKPIHistory(selectedProject);

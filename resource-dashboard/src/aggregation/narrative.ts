@@ -58,8 +58,12 @@ interface NarrativeData {
  */
 export async function generateNarrativeSummary(
   month: string,
-  projectFilter?: string
+  projectFilter?: string,
+  engineerFilter?: string
 ): Promise<NarrativeSummary> {
+  if (engineerFilter) {
+    return generateEngineerNarrative(month, engineerFilter);
+  }
   if (projectFilter) {
     return generateProjectNarrative(month, projectFilter);
   }
@@ -70,7 +74,8 @@ export async function generateNarrativeSummary(
 
 async function loadNarrativeData(
   month: string,
-  projectFilter?: string
+  projectFilter?: string,
+  engineerFilter?: string
 ): Promise<NarrativeData> {
   const narrativeConfig: NarrativeConfig =
     (await db.narrativeConfig.get(1)) ?? DEFAULT_NARRATIVE_CONFIG;
@@ -97,7 +102,7 @@ async function loadNarrativeData(
   const projects = await db.projects.toArray();
   const projectMap = new Map(projects.map(p => [p.project_id, p]));
 
-  const kpi: KPIResults = await computeAllKPIs(month, projectFilter);
+  const kpi: KPIResults = await computeAllKPIs(month, projectFilter, engineerFilter);
 
   return {
     kpi,
@@ -109,6 +114,36 @@ async function loadNarrativeData(
     config: dashConfig!,
     narrativeConfig,
     capacity,
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Engineer Narrative (Single Engineer mode)
+// ══════════════════════════════════════════════════════════════
+
+async function generateEngineerNarrative(
+  month: string,
+  engineer: string
+): Promise<NarrativeSummary> {
+  const data = await loadNarrativeData(month, undefined, engineer);
+
+  if (data.timesheets.length === 0) {
+    return {
+      paragraph: `No timesheet data found for ${engineer} in ${formatMonthLabel(month)}.`,
+      highlights: [],
+    };
+  }
+
+  const totalHours = data.timesheets.reduce((sum, t) => sum + t.hours, 0);
+  const projectSet = new Set(data.timesheets.map(t => t.r_number).filter(Boolean));
+  const monthLabel = formatMonthLabel(month);
+
+  return {
+    paragraph: `In ${monthLabel}, ${engineer} logged ${Math.round(totalHours)} hours across ${projectSet.size} project${projectSet.size !== 1 ? 's' : ''}.`,
+    highlights: [
+      `${Math.round(totalHours)} hours logged`,
+      `${projectSet.size} project${projectSet.size !== 1 ? 's' : ''}`,
+    ],
   };
 }
 

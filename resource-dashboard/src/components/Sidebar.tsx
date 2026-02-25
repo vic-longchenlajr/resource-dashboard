@@ -2,16 +2,20 @@ import { Link, useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
 
+const DASHBOARD_ICON = (
+  <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1h-4a1 1 0 01-1-1v-5zM4 14a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1v-5z" />
+  </svg>
+);
+
+const DASHBOARD_SUB_ITEMS = [
+  { path: '/dashboard/overview', label: 'Overview' },
+  { path: '/dashboard/planning', label: 'Planning' },
+  { path: '/dashboard/team', label: 'Team' },
+  { path: '/dashboard/engineer', label: 'Engineer Profile' },
+];
+
 const NAV_ITEMS = [
-  {
-    path: '/dashboard',
-    label: 'Dashboard',
-    icon: (
-      <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1h-4a1 1 0 01-1-1v-5zM4 14a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1v-5z" />
-      </svg>
-    ),
-  },
   {
     path: '/updates',
     label: 'Updates',
@@ -77,6 +81,62 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-3">
+        {/* Dashboard section with sub-items */}
+        {(() => {
+          const isDashboardActive = location.pathname.startsWith('/dashboard');
+          return (
+            <div className="mb-1">
+              <Link
+                to="/dashboard/overview"
+                className="flex items-center gap-3 rounded-md text-[13px] font-medium transition-colors border-l-[3px] pl-[9px] pr-3 py-2.5"
+                style={{
+                  color: isDashboardActive ? 'var(--text-on-dark-active)' : 'var(--text-on-dark)',
+                  borderColor: isDashboardActive ? 'var(--accent)' : 'transparent',
+                  backgroundColor: isDashboardActive ? 'var(--bg-sidebar-active)' : 'transparent',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isDashboardActive) e.currentTarget.style.backgroundColor = 'var(--bg-sidebar-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isDashboardActive) e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <span style={{ color: isDashboardActive ? 'var(--text-on-dark-active)' : 'var(--text-on-dark)' }}>
+                  {DASHBOARD_ICON}
+                </span>
+                Dashboard
+              </Link>
+              {/* Sub-items */}
+              <div className="mt-0.5">
+                {DASHBOARD_SUB_ITEMS.map(sub => {
+                  const isSubActive = location.pathname === sub.path;
+                  return (
+                    <Link
+                      key={sub.path}
+                      to={sub.path}
+                      className="flex items-center rounded-md text-[12px] transition-colors mb-0.5 pl-[39px] pr-3 py-1.5"
+                      style={{
+                        color: isSubActive ? 'var(--text-on-dark-active)' : 'var(--text-on-dark-muted)',
+                        backgroundColor: isSubActive ? 'rgba(255,255,255,0.08)' : 'transparent',
+                        fontWeight: isSubActive ? 500 : 400,
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSubActive) e.currentTarget.style.backgroundColor = 'var(--bg-sidebar-hover)';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSubActive) e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      {sub.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Other nav items */}
         {NAV_ITEMS.map((item) => {
           const isActive = location.pathname === item.path;
 

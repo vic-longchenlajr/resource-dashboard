@@ -14,7 +14,8 @@ import { resolveMonths, toDbMonths, fromDbMonth } from '../utils/monthRange';
  */
 export async function computeTechAffinity(
   monthFilter?: MonthFilter,
-  projectFilter?: string
+  projectFilter?: string,
+  engineerFilter?: string
 ): Promise<TechAffinityResult[]> {
   const teamMembers = await db.teamMembers.toArray();
 
@@ -103,5 +104,6 @@ export async function computeTechAffinity(
   }
 
   // Sort by shared_hours descending
-  return affinities.sort((a, b) => b.shared_hours - a.shared_hours);
+  const sorted = affinities.sort((a, b) => b.shared_hours - a.shared_hours);
+  return engineerFilter ? sorted.filter(a => a.engineer === engineerFilter) : sorted;
 }

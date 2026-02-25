@@ -6,7 +6,7 @@ import { computeAnomalies } from '../../aggregation/anomalies';
 import { ANOMALY_RULES } from '../../aggregation/anomalyRules';
 import type { AnomalyWithStatus, AnomalyStatus } from '../../types';
 import type { AnomalySeverity } from '../../aggregation/anomalies';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 
 const SEVERITY_STYLES: Record<AnomalySeverity, { bg: string; border: string; icon: string; text: string }> = {
   alert: {
@@ -42,7 +42,7 @@ export function AnomalyAlertsPanel() {
   const [showAll, setShowAll] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [showResolved, setShowResolved] = useState(false);
-  const { monthFilter, selectedMonth, selectedProject, isRange } = useMonthFilter();
+  const { monthFilter, selectedMonth, selectedProject, isRange } = useFilters();
 
   const anomalies = useLiveQuery(async () => {
     // Anomalies stay single-month for historical comparison

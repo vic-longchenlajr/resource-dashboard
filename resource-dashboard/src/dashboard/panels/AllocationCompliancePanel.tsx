@@ -3,7 +3,7 @@ import { db } from '../../db/database';
 import { computeActualHours } from '../../aggregation/engine';
 import { getProjectParent } from '../../aggregation/projectUtils';
 import { formatHours } from '../../utils/format';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 import { resolveMonths } from '../../utils/monthRange';
 
 interface ComplianceRow {
@@ -17,7 +17,7 @@ interface ComplianceRow {
 }
 
 export function AllocationCompliancePanel() {
-  const { monthFilter, selectedProject } = useMonthFilter();
+  const { monthFilter, selectedProject } = useFilters();
 
   const complianceData = useLiveQuery(async () => {
     if (!monthFilter) return null;

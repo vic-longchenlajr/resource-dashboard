@@ -5,10 +5,10 @@ import { KPI_REGISTRY, formatKPIValue, getKPIColor } from '../../aggregation/kpi
 import { KPICard } from '../../charts/KPICard';
 import { DEFAULT_KPI_CARDS } from '../../aggregation/kpiRegistry';
 import type { KPICardKey } from '../../types';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 
 export function KPISummaryPanel() {
-  const { monthFilter, selectedProject } = useMonthFilter();
+  const { monthFilter, selectedProject } = useFilters();
   const config = useLiveQuery(() => db.config.get(1));
   const kpiCards: KPICardKey[] = config?.kpi_cards ?? DEFAULT_KPI_CARDS;
 

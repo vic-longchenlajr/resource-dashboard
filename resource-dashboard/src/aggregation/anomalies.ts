@@ -49,7 +49,7 @@ export function generateAnomalyId(anomaly: Anomaly): string {
  * Reads user-configured thresholds from Dexie; falls back to ANOMALY_RULES defaults.
  * Returns a severity-sorted list of alerts.
  */
-export async function computeAnomalies(month?: MonthFilter, projectFilter?: string): Promise<Anomaly[]> {
+export async function computeAnomalies(month?: MonthFilter, projectFilter?: string, engineerFilter?: string): Promise<Anomaly[]> {
   // Load configurable thresholds
   const storedThresholds = await db.anomalyThresholds.toArray();
   const thresholdMap: Map<string, AnomalyThreshold> = new Map(
@@ -65,6 +65,10 @@ export async function computeAnomalies(month?: MonthFilter, projectFilter?: stri
     timesheets = timesheets.filter(t =>
       getProjectParent(t.r_number) === projectFilter || t.r_number === projectFilter
     );
+  }
+
+  if (engineerFilter) {
+    timesheets = timesheets.filter(t => t.full_name === engineerFilter);
   }
 
   if (timesheets.length === 0) return [];

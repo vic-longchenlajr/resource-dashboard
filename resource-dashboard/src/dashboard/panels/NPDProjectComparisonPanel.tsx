@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { computeNPDProjectComparison } from '../../aggregation/engine';
 import { getProjectParent } from '../../aggregation/projectUtils';
-import { useMonthFilter } from '../../hooks/useMonthFilter';
+import { useFilters } from '../../context/ViewFilterContext';
 import {
   BarChart,
   Bar,
@@ -17,7 +17,7 @@ import { CATEGORY_COLORS, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE, LEGEND_STYLE, C
 import { formatHours } from '../../utils/format';
 
 export function NPDProjectComparisonPanel() {
-  const { monthFilter, selectedProject } = useMonthFilter();
+  const { monthFilter, selectedProject } = useFilters();
 
   const npdProjects = useLiveQuery(async () => {
     if (!monthFilter) return null;

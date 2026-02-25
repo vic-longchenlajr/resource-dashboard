@@ -22,7 +22,8 @@ import { resolveMonths, toDbMonths, fromDbMonth } from '../utils/monthRange';
  */
 export async function computeActualHours(
   monthFilter?: MonthFilter,
-  projectFilter?: string
+  projectFilter?: string,
+  engineerFilter?: string
 ): Promise<ActualHoursSummary[]> {
   const teamMembers = await db.teamMembers.toArray();
   const projects = await db.projects.toArray();
@@ -45,7 +46,8 @@ export async function computeActualHours(
   // Filter to engineers only, and optionally by project (including sub-projects)
   const engineerEntries = timesheets.filter(t =>
     engineers.has(t.full_name) &&
-    (!projectFilter || getProjectParent(t.r_number) === projectFilter || t.r_number === projectFilter)
+    (!projectFilter || getProjectParent(t.r_number) === projectFilter || t.r_number === projectFilter) &&
+    (!engineerFilter || t.full_name === engineerFilter)
   );
 
   // Group by (month, project_id/r_number, engineer)

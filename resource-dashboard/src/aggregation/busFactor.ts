@@ -22,7 +22,7 @@ export interface BusFactorResult {
  * Identifies projects where knowledge is concentrated in too few people.
  * Bus Factor = minimum people needed to cover >50% of hours.
  */
-export async function computeBusFactorRisk(month?: MonthFilter, projectFilter?: string): Promise<BusFactorResult[]> {
+export async function computeBusFactorRisk(month?: MonthFilter, projectFilter?: string, engineerFilter?: string): Promise<BusFactorResult[]> {
   const projects = await db.projects.toArray();
   const projectMap = new Map(projects.map(p => [p.project_id, p]));
 
@@ -35,6 +35,10 @@ export async function computeBusFactorRisk(month?: MonthFilter, projectFilter?: 
     timesheets = timesheets.filter(t =>
       getProjectParent(t.r_number) === projectFilter || t.r_number === projectFilter
     );
+  }
+
+  if (engineerFilter) {
+    timesheets = timesheets.filter(t => t.full_name === engineerFilter);
   }
 
   if (timesheets.length === 0) return [];

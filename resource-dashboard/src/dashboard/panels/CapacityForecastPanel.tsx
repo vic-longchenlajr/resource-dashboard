@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/database';
+import { useFilters } from '../../context/ViewFilterContext';
 import { computeCapacityForecast } from '../../aggregation/capacityForecast';
 import { Heatmap } from '../../charts/Heatmap';
 import { formatPercent, formatMonth } from '../../utils/format';
@@ -16,8 +17,7 @@ function forecastColor(pct: number): string {
 }
 
 export function CapacityForecastPanel() {
-  const config = useLiveQuery(() => db.config.get(1));
-  const selectedProject = config?.selected_project || undefined;
+  const { selectedProject } = useFilters();
 
   // Determine future months: all months from plannedAllocations that have no timesheet data
   const forecastData = useLiveQuery(async () => {
