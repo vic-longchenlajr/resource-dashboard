@@ -32,24 +32,18 @@ export interface ViewFilterContextValue {
 
 export const ViewFilterContext = createContext<ViewFilterContextValue | null>(null);
 
-/**
- * Convenience hook: reads ViewFilterContext.
- * Drop-in replacement for useMonthFilter(), plus selectedEngineer.
- */
+/** Convenience hook: reads ViewFilterContext. */
 export function useFilters(): ViewFilterContextValue {
   const ctx = useContext(ViewFilterContext);
   if (!ctx) throw new Error('useFilters must be used within a ViewFilterProvider');
   return ctx;
 }
 
-// ── Dexie-backed Provider (for DashboardPageV3 backward compat) ───────────
+// ── Dexie-backed Provider ─────────────────────────────────────────────────
 
 /**
  * Reads filter state from the Dexie config singleton (id=1).
- * Used by DashboardPageV3 so that the existing DashboardHeader
- * (which writes to Dexie) continues to drive all panels.
- *
- * Phase 2 view pages will use UrlViewFilterProvider instead.
+ * Shared by all 4 view pages; filter state persists across view navigation.
  */
 export function DexieViewFilterProvider({ children }: { children: React.ReactNode }) {
   const config = useLiveQuery(() => db.config.get(1));

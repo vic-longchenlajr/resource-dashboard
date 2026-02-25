@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
-import { usePanelConfig } from '../dashboard/hooks/usePanelConfig';
 import { exportExecutivePDF } from './executivePDFExport';
 import type { PDFExportSections } from '../types';
-import type { PanelAvailability } from '../hooks/usePanelAvailability';
+
+interface PanelAvailability {
+  panelId: string;
+  available: boolean;
+}
 
 interface ExportConfigModalProps {
   isOpen: boolean;
@@ -14,6 +17,23 @@ interface ExportConfigModalProps {
 }
 
 // Chart panels that can be included in the PDF export
+const PANEL_LABELS: Record<string, string> = {
+  'engineer-breakdown':    'Engineer Hour Breakdown',
+  'npd-project-comp':      'NPD Projects: Planned vs Actual',
+  'planned-vs-actual':     'Planned vs Actual (NPD/Sustaining)',
+  'firefighting-trend':    'Firefighting (Unplanned) Hours',
+  'project-timeline':      'Selected Project Timeline',
+  'focus-score':           'Focus Score',
+  'lab-tech-hours':        'Lab Tech Hours by Engineer',
+  'meeting-tax':           'Meeting & Admin Tax',
+  'allocation-compliance': 'Allocation Compliance',
+  'bus-factor':            'Knowledge Risk (Bus Factor)',
+  'utilization-heatmap':   'Planned Utilization Heatmap',
+  'milestone-timeline':    'NPD Milestones',
+  'skill-heatmap':         'Skill Heat Map',
+  'tech-affinity':         'Engineer ↔ Tech Collaboration',
+};
+
 const CHART_PANEL_IDS = [
   'engineer-breakdown',
   'npd-project-comp',
@@ -38,7 +58,6 @@ export function ExportConfigModal({ isOpen, onClose, selectedMonth, availability
   const [exportError, setExportError] = useState('');
 
   const config = useLiveQuery(() => db.config.get(1));
-  const { panels } = usePanelConfig();
 
   // PDF section config — loaded from persisted config
   const [pdfSections, setPdfSections] = useState<PDFExportSections>({
@@ -58,19 +77,13 @@ export function ExportConfigModal({ isOpen, onClose, selectedMonth, availability
     }
   }, [config]);
 
-  // Enabled panel IDs (for filtering chart list)
-  const enabledPanelIds = new Set(panels?.filter(p => p.enabled).map(p => p.id) ?? []);
-
-  // Chart panels available for PDF export (only enabled + data-available ones)
+  // Chart panels available for PDF export (filtered by data availability when provided)
   const availableSet = new Set(
     availability.filter(a => a.available).map(a => a.panelId)
   );
   const availableChartPanels = CHART_PANEL_IDS.filter(id =>
-    enabledPanelIds.has(id) && (availability.length === 0 || availableSet.has(id))
+    availability.length === 0 || availableSet.has(id)
   );
-
-  // Panel ID → label mapping
-  const panelLabelMap = new Map(panels?.map(p => [p.id, p.label]) ?? []);
 
   if (!isOpen) return null;
 
@@ -210,7 +223,7 @@ export function ExportConfigModal({ isOpen, onClose, selectedMonth, availability
                           key={panelId}
                           checked={pdfSections.chartPanels.includes(panelId)}
                           onChange={() => handleToggleChart(panelId)}
-                          label={panelLabelMap.get(panelId) ?? panelId}
+                          label={PANEL_LABELS[panelId] ?? panelId}
                         />
                       ))
                     )}
