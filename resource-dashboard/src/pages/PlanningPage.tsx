@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../db/database';
+import { usePanelDataCheck } from '../hooks/usePanelDataCheck';
 import { ViewHeader } from '../dashboard/ViewHeader';
 import { PanelWrapper } from '../dashboard/PanelWrapper';
 import { PanelErrorBoundary } from '../dashboard/PanelErrorBoundary';
@@ -35,6 +36,12 @@ export function PlanningPage() {
     }
   };
 
+  const showUtilization = usePanelDataCheck('utilization-heatmap');
+  const showCapacity = usePanelDataCheck('capacity-forecast');
+  const showNpdComp = usePanelDataCheck('npd-project-comp');
+  const showMilestones = usePanelDataCheck('milestone-timeline');
+  const showProjectTimeline = usePanelDataCheck('project-timeline');
+
   return (
     <div>
       <ViewHeader title="Planning & Resources" onProjectChange={handleProjectChange} />
@@ -51,35 +58,45 @@ export function PlanningPage() {
           </PanelErrorBoundary>
         </PanelWrapper>
 
-        <PanelWrapper id="utilization-heatmap" title="Planned Utilization Heatmap" className={FULL_WIDTH}>
-          <PanelErrorBoundary panelId="utilization-heatmap">
-            <UtilizationHeatmapPanel />
-          </PanelErrorBoundary>
-        </PanelWrapper>
+        {showUtilization && (
+          <PanelWrapper id="utilization-heatmap" title="Planned Utilization Heatmap" className={FULL_WIDTH}>
+            <PanelErrorBoundary panelId="utilization-heatmap">
+              <UtilizationHeatmapPanel />
+            </PanelErrorBoundary>
+          </PanelWrapper>
+        )}
 
-        <PanelWrapper id="capacity-forecast" title="Capacity Forecast" className={FULL_WIDTH}>
-          <PanelErrorBoundary panelId="capacity-forecast">
-            <CapacityForecastPanel />
-          </PanelErrorBoundary>
-        </PanelWrapper>
+        {showCapacity && (
+          <PanelWrapper id="capacity-forecast" title="Capacity Forecast" className={FULL_WIDTH}>
+            <PanelErrorBoundary panelId="capacity-forecast">
+              <CapacityForecastPanel />
+            </PanelErrorBoundary>
+          </PanelWrapper>
+        )}
 
-        <PanelWrapper id="npd-project-comp" title="NPD Projects: Planned vs Actual" className={FULL_WIDTH}>
-          <PanelErrorBoundary panelId="npd-project-comp">
-            <NPDProjectComparisonPanel />
-          </PanelErrorBoundary>
-        </PanelWrapper>
+        {showNpdComp && (
+          <PanelWrapper id="npd-project-comp" title="NPD Projects: Planned vs Actual" className={FULL_WIDTH}>
+            <PanelErrorBoundary panelId="npd-project-comp">
+              <NPDProjectComparisonPanel />
+            </PanelErrorBoundary>
+          </PanelWrapper>
+        )}
 
-        <PanelWrapper id="milestone-timeline" title="NPD Milestones" className={FULL_WIDTH}>
-          <PanelErrorBoundary panelId="milestone-timeline">
-            <NPDMilestonesPanel />
-          </PanelErrorBoundary>
-        </PanelWrapper>
+        {showMilestones && (
+          <PanelWrapper id="milestone-timeline" title="NPD Milestones" className={FULL_WIDTH}>
+            <PanelErrorBoundary panelId="milestone-timeline">
+              <NPDMilestonesPanel />
+            </PanelErrorBoundary>
+          </PanelWrapper>
+        )}
 
-        <PanelWrapper id="project-timeline" title="Selected Project Timeline" className={FULL_WIDTH}>
-          <PanelErrorBoundary panelId="project-timeline">
-            <ProjectBurndownPanel />
-          </PanelErrorBoundary>
-        </PanelWrapper>
+        {showProjectTimeline && (
+          <PanelWrapper id="project-timeline" title="Selected Project Timeline" className={FULL_WIDTH}>
+            <PanelErrorBoundary panelId="project-timeline">
+              <ProjectBurndownPanel />
+            </PanelErrorBoundary>
+          </PanelWrapper>
+        )}
       </div>
     </div>
   );

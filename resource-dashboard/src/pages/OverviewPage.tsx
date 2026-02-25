@@ -5,8 +5,11 @@ import { KPISummaryPanel } from '../dashboard/panels/KPISummaryPanel';
 import { NarrativeSummaryPanel } from '../dashboard/panels/NarrativeSummaryPanel';
 import { AnomalyAlertsPanel } from '../dashboard/panels/AnomalyAlertsPanel';
 import { KPITrendPanel } from '../dashboard/panels/KPITrendPanel';
+import { usePanelDataCheck } from '../hooks/usePanelDataCheck';
 
 export function OverviewPage() {
+  const showKpiTrends = usePanelDataCheck('kpi-trends');
+
   return (
     <div>
       <ViewHeader title="Overview" />
@@ -29,11 +32,13 @@ export function OverviewPage() {
           </PanelErrorBoundary>
         </PanelWrapper>
 
-        <PanelWrapper id="kpi-trends" title="KPI Trends">
-          <PanelErrorBoundary panelId="kpi-trends">
-            <KPITrendPanel />
-          </PanelErrorBoundary>
-        </PanelWrapper>
+        {showKpiTrends && (
+          <PanelWrapper id="kpi-trends" title="KPI Trends">
+            <PanelErrorBoundary panelId="kpi-trends">
+              <KPITrendPanel />
+            </PanelErrorBoundary>
+          </PanelWrapper>
+        )}
       </div>
     </div>
   );
