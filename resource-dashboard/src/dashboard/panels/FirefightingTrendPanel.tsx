@@ -21,7 +21,11 @@ export function FirefightingTrendPanel() {
     [selectedProject]
   );
 
-  if (!categoryTotals || categoryTotals.length === 0) {
+  if (categoryTotals === undefined) {
+    return <div className="animate-pulse h-64 bg-[var(--border-subtle)] rounded-lg" />;
+  }
+
+  if (categoryTotals.length === 0) {
     return <div className="text-center py-12 text-[var(--text-muted)]">No timesheet data found. Import LiquidPlanner CSV files to populate this chart.</div>;
   }
 

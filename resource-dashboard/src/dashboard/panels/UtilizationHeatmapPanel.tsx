@@ -12,7 +12,11 @@ export function UtilizationHeatmapPanel() {
     [selectedProject]
   );
 
-  if (!utilization || utilization.length === 0) {
+  if (utilization === undefined) {
+    return <div className="animate-pulse h-64 bg-[var(--border-subtle)] rounded-lg" />;
+  }
+
+  if (utilization.length === 0) {
     return (
       <div className="text-center py-12 text-[var(--text-muted)]">
         No planned utilization data. Configure in Settings &rarr; Resource Allocations
