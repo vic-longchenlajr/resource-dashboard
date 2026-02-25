@@ -3,6 +3,7 @@ import { db } from '../../db/database';
 import { useFilters } from '../../context/ViewFilterContext';
 import { resolveMonths, toDbMonths } from '../../utils/monthRange';
 import { ProjectType } from '../../types';
+import { formatHours } from '../../utils/format';
 
 const TYPE_BADGE: Record<string, { bg: string; color: string }> = {
   NPD: { bg: '#dbeafe', color: '#2563eb' },
@@ -145,13 +146,13 @@ export function ProjectPortfolioPanel({ activityFilter, onProjectClick }: Props)
                   </span>
                 </td>
                 <td className="py-2 pr-4 text-right text-[var(--text-primary)] font-medium">
-                  {row.hours.toFixed(1)}h
+                  {formatHours(row.hours)}h
                 </td>
                 <td className="py-2 pr-4 text-right text-[var(--text-muted)]">
                   {Math.round(row.pct * 100)}%
                 </td>
                 <td className="py-2 text-right text-[var(--text-muted)]">
-                  {row.plannedHours > 0 ? `${row.plannedHours.toFixed(1)}h` : '—'}
+                  {row.plannedHours > 0 ? `${formatHours(row.plannedHours)}h` : '—'}
                 </td>
               </tr>
             );

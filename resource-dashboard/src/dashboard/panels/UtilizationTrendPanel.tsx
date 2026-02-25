@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/database';
 import { useFilters } from '../../context/ViewFilterContext';
 import { fromDbMonth } from '../../utils/monthRange';
-import { formatMonth } from '../../utils/format';
+import { formatMonth, formatHours } from '../../utils/format';
 import {
   BarChart,
   Bar,
@@ -76,7 +76,7 @@ export function UtilizationTrendPanel() {
       >
         <p style={{ fontWeight: 600, marginBottom: 4 }}>{formatMonth(label)}</p>
         <p>
-          {hours.toFixed(1)}h — {pct}% of capacity
+          {formatHours(hours)}h — {pct}% of capacity
         </p>
       </div>
     );

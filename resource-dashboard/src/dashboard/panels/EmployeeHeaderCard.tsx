@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/database';
 import { useFilters } from '../../context/ViewFilterContext';
 import { resolveMonths, toDbMonths } from '../../utils/monthRange';
+import { formatHours } from '../../utils/format';
 
 function Stat({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
@@ -95,7 +96,7 @@ export function EmployeeHeaderCard() {
           value={utilization != null ? `${Math.round(utilization * 100)}%` : '—'}
           color={utilColor}
         />
-        <Stat label="Total Hours" value={stats ? stats.totalHours.toFixed(1) : '—'} />
+        <Stat label="Total Hours" value={stats ? formatHours(stats.totalHours) : '—'} />
         <Stat label="Active Projects" value={stats ? String(stats.activeProjects) : '—'} />
         <Stat label="Capacity" value={`${capacity}h`} />
       </div>

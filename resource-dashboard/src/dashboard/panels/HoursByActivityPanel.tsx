@@ -3,6 +3,7 @@ import { db } from '../../db/database';
 import { useFilters } from '../../context/ViewFilterContext';
 import { resolveMonths, toDbMonths } from '../../utils/monthRange';
 import { PieChart, Pie, Cell, Tooltip, Label, ResponsiveContainer } from 'recharts';
+import { formatHours } from '../../utils/format';
 
 const ACTIVITY_COLORS: Record<string, string> = {
   'Engineering': '#2563eb',
@@ -73,7 +74,7 @@ export function HoursByActivityPanel({ activityFilter, onActivityChange }: Props
       >
         <p style={{ fontWeight: 600, marginBottom: 4 }}>{d.activity}</p>
         <p>
-          {d.hours.toFixed(1)}h — {Math.round(d.pct * 100)}%
+          {formatHours(d.hours)}h — {Math.round(d.pct * 100)}%
         </p>
       </div>
     );
@@ -93,7 +94,7 @@ export function HoursByActivityPanel({ activityFilter, onActivityChange }: Props
           fontWeight="700"
           fill="var(--text-primary)"
         >
-          {data.total.toFixed(1)}
+          {formatHours(data.total)}
         </text>
         <text x={cx} y={cy + 12} textAnchor="middle" fontSize="11" fill="#94a3b8">
           hours
@@ -159,7 +160,7 @@ export function HoursByActivityPanel({ activityFilter, onActivityChange }: Props
             <div className="flex gap-3 text-right">
               <span className="text-[var(--text-muted)]">{Math.round(s.pct * 100)}%</span>
               <span className="text-[var(--text-primary)] font-medium w-14 text-right">
-                {s.hours.toFixed(1)}h
+                {formatHours(s.hours)}h
               </span>
             </div>
           </div>
