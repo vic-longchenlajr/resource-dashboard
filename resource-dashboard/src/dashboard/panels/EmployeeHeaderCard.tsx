@@ -3,6 +3,7 @@ import { db } from '../../db/database';
 import { useFilters } from '../../context/ViewFilterContext';
 import { resolveMonths, toDbMonths } from '../../utils/monthRange';
 import { formatHours } from '../../utils/format';
+import { getEngineerCapacity } from '../../utils/capacity';
 
 function Stat({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
@@ -44,10 +45,8 @@ export function EmployeeHeaderCard() {
 
   if (!selectedEngineer) return null;
 
-  const capacity =
-    member && member.capacity_override_hours > 0
-      ? member.capacity_override_hours
-      : (config?.std_monthly_capacity_hours ?? 140);
+  const stdCap = config?.std_monthly_capacity_hours ?? 140;
+  const capacity = member ? getEngineerCapacity(member, stdCap) : stdCap;
 
   const utilization = stats ? stats.totalHours / capacity : null;
 

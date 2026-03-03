@@ -55,15 +55,21 @@ export function LabTechHoursPanel({ onPersonClick }: { onPersonClick?: (name: st
     totalHoursMap.set(a.engineer, (totalHoursMap.get(a.engineer) || 0) + a.actual_hours);
   });
 
+  // Aggregate lab hours by engineer (computeLabTechHours returns one row per month per engineer)
+  const labHoursMap = new Map<string, number>();
+  labTechHours.forEach(d => {
+    labHoursMap.set(d.engineer, (labHoursMap.get(d.engineer) || 0) + d.lab_tech_hours);
+  });
+
   // Sort by lab hours descending
-  const chartData = labTechHours
-    .map(d => {
-      const totalHours = totalHoursMap.get(d.engineer) || 0;
+  const chartData = [...labHoursMap.entries()]
+    .map(([engineer, labHours]) => {
+      const totalHours = totalHoursMap.get(engineer) || 0;
       return {
-        engineer: d.engineer,
-        labHours: d.lab_tech_hours,
+        engineer,
+        labHours,
         totalHours,
-        percentage: totalHours > 0 ? (d.lab_tech_hours / totalHours) * 100 : 0,
+        percentage: totalHours > 0 ? (labHours / totalHours) * 100 : 0,
       };
     })
     .sort((a, b) => b.labHours - a.labHours);

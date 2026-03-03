@@ -6,6 +6,7 @@ import { computeMonthlyCategoryTotals } from './plannedVsActual';
 import { getProjectParent } from './projectUtils';
 import type { MonthFilter } from '../utils/monthRange';
 import { resolveMonths, toDbMonths, fromDbMonth } from '../utils/monthRange';
+import { getEngineerCapacity } from '../utils/capacity';
 
 /**
  * Single source of truth for all KPI values.
@@ -48,7 +49,7 @@ export async function computeAllKPIs(
   const monthCount = months.length;
   const totalCapacity = teamMembers
     .filter(m => m.role === PersonRole.Engineer && activeEngineerNames.has(m.full_name))
-    .reduce((sum, m) => sum + (m.capacity_override_hours > 0 ? m.capacity_override_hours : defaultCapacity), 0)
+    .reduce((sum, m) => sum + getEngineerCapacity(m, defaultCapacity), 0)
     * monthCount;
 
   const teamUtilization = totalCapacity > 0 ? totalHoursLogged / totalCapacity : 0;
@@ -299,7 +300,7 @@ function computeKPIsFromData(
 
   const totalCapacity = teamMembers
     .filter(m => m.role === PersonRole.Engineer && activeEngineerNames.has(m.full_name))
-    .reduce((sum, m) => sum + (m.capacity_override_hours > 0 ? m.capacity_override_hours : defaultCapacity), 0);
+    .reduce((sum, m) => sum + getEngineerCapacity(m, defaultCapacity), 0);
 
   const teamUtilization = totalCapacity > 0 ? totalHoursLogged / totalCapacity : 0;
   const npdFocus = totalHoursLogged > 0 ? npdHours / totalHoursLogged : 0;

@@ -190,7 +190,7 @@ export interface PDFExportSections {
   chartPanels: string[];        // panel IDs to include
 }
 
-export type DateRangePreset = 'single' | 'quarter' | 'year' | 'ytd' | 'all';
+export type DateRangePreset = 'single' | 'quarter' | 'year' | 'ytd' | 'all' | 'range';
 
 export interface DateRange {
   type: DateRangePreset;
@@ -474,6 +474,52 @@ export interface AnomalySnapshot {
 export interface AnomalyWithStatus extends StoredAnomaly {
   status: AnomalyStatus;
   recurring_months?: number;  // How many consecutive prior months this appeared
+}
+
+// ============================================================
+// SCENARIO PLANNING
+// ============================================================
+
+/**
+ * A named what-if planning scenario (envelope/header).
+ */
+export interface PlanningScenario {
+  id?: number;
+  name: string;                        // "New K5.6 Sprinkler"
+  description: string;                 // optional notes
+  created_at: string;                  // ISO datetime
+  updated_at: string;                  // ISO datetime
+  status: 'draft' | 'saved' | 'archived';
+  base_month_start: string;            // YYYY-MM — scenario time window
+  base_month_end: string;              // YYYY-MM
+  source_template_project?: string;    // R# of project used as hours template (if any)
+  estimated_total_hours?: number;      // user's total estimate
+}
+
+/**
+ * A hypothetical allocation row belonging to a scenario.
+ * Mirrors PlannedAllocation to enable direct overlay into computeCapacityForecast.
+ */
+export interface ScenarioAllocation {
+  id?: number;
+  scenario_id: number;                 // FK → PlanningScenario.id
+  month: string;                       // YYYY-MM
+  project_id: string;                  // scenario project label or "SCENARIO-{id}"
+  engineer: string;                    // full_name
+  allocation_pct: number;              // 0-1
+  planned_hours: number;
+}
+
+/**
+ * Frozen snapshot of a scenario's computed capacity forecast.
+ * Stored for fast scenario comparison without re-querying.
+ */
+export interface ScenarioSnapshot {
+  id?: number;
+  scenario_id: number;                 // FK → PlanningScenario.id
+  computed_at: string;                 // ISO datetime
+  entries: CapacityForecastEntry[];    // frozen forecast result
+  summaries: CapacityForecastSummary[];
 }
 
 // ============================================================

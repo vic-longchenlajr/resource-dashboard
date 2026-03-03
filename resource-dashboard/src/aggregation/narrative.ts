@@ -13,6 +13,7 @@ import { computeFocusScore } from './focusScore';
 import { computeBusFactorRisk } from './busFactor';
 import { computeMeetingTax } from './meetingTax';
 import { computeNPDProjectComparison } from './plannedVsActual';
+import { getEngineerCapacity } from '../utils/capacity';
 import { DEFAULT_NARRATIVE_CONFIG, NARRATIVE_OBSERVATIONS } from './narrativeObservations';
 import type { NarrativeMode } from './narrativeObservations';
 import { getProjectParent } from './projectUtils';
@@ -186,9 +187,8 @@ async function generateTeamNarrative(month: string): Promise<NarrativeSummary> {
   const overloaded: string[] = [];
   const underloaded: string[] = [];
   for (const [person, hours] of personHours) {
-    const memberCap = (teamMemberMap.get(person)?.capacity_override_hours ?? 0) > 0
-      ? teamMemberMap.get(person)!.capacity_override_hours
-      : capacity;
+    const memberObj = teamMemberMap.get(person);
+    const memberCap = memberObj ? getEngineerCapacity(memberObj, capacity) : capacity;
     if (hours > memberCap * 1.15) overloaded.push(person);
     else if (hours < memberCap * 0.6) underloaded.push(person);
   }

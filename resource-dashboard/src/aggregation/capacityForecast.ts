@@ -1,22 +1,31 @@
 import { db } from '../db/database';
 import { PersonRole } from '../types';
-import type { CapacityForecastEntry, CapacityForecastSummary } from '../types';
+import type { CapacityForecastEntry, CapacityForecastSummary, PlannedAllocation } from '../types';
+import { getEngineerCapacity } from '../utils/capacity';
 
 /**
  * Compute forward-looking capacity forecast from planned allocations.
  * Returns per-engineer/per-month entries and monthly summaries.
+ *
+ * @param overlayAllocations - Optional hypothetical allocations to merge in
+ *   (scenario planning). These are additive — they do not replace stored data.
  */
 export async function computeCapacityForecast(
   months: string[],
-  projectFilter?: string
+  projectFilter?: string,
+  overlayAllocations?: PlannedAllocation[]
 ): Promise<{ entries: CapacityForecastEntry[]; summaries: CapacityForecastSummary[] }> {
   if (months.length === 0) return { entries: [], summaries: [] };
 
-  const [allocations, teamMembers, config] = await Promise.all([
+  const [stored, teamMembers, config] = await Promise.all([
     db.plannedAllocations.toArray(),
     db.teamMembers.toArray(),
     db.config.get(1),
   ]);
+
+  const allocations = overlayAllocations
+    ? [...stored, ...overlayAllocations]
+    : stored;
 
   const stdCapacity = config?.std_monthly_capacity_hours ?? 140;
   const monthSet = new Set(months);
@@ -26,7 +35,7 @@ export async function computeCapacityForecast(
   const engineerSet = new Set<string>();
   for (const m of teamMembers) {
     if (m.role === PersonRole.Engineer) {
-      capacityMap.set(m.full_name, m.capacity_override_hours > 0 ? m.capacity_override_hours : stdCapacity);
+      capacityMap.set(m.full_name, getEngineerCapacity(m, stdCapacity));
       engineerSet.add(m.full_name);
     }
   }

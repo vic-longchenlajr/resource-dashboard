@@ -2,6 +2,7 @@ import { db } from '../db/database';
 import { PersonRole } from '../types';
 import type { UtilizationCell } from '../types';
 import { getProjectParent } from './projectUtils';
+import { getEngineerCapacity } from '../utils/capacity';
 
 /**
  * Compute planned utilization heatmap for engineers.
@@ -37,9 +38,7 @@ export async function computePlannedUtilization(projectFilter?: string): Promise
   const result: UtilizationCell[] = [];
 
   for (const member of relevantMembers) {
-    const capacity = member.capacity_override_hours > 0
-      ? member.capacity_override_hours
-      : defaultCapacity;
+    const capacity = getEngineerCapacity(member, defaultCapacity);
 
     for (const month of months) {
       // Show full utilization (all projects) for the filtered engineers

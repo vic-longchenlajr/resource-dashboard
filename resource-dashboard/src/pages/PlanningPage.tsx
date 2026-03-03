@@ -14,6 +14,7 @@ import { CapacityForecastPanel } from '../dashboard/panels/CapacityForecastPanel
 import { NPDProjectComparisonPanel } from '../dashboard/panels/NPDProjectComparisonPanel';
 import { NPDMilestonesPanel } from '../dashboard/panels/NPDMilestonesPanel';
 import { ProjectBurndownPanel } from '../dashboard/panels/ProjectBurndownPanel';
+import { WhatIfPlannerPanel } from '../dashboard/panels/WhatIfPlannerPanel';
 
 const FULL_WIDTH = 'lg:col-span-2';
 
@@ -25,6 +26,7 @@ const PLANNING_CHART_PANELS = [
   'npd-project-comp',
   'milestone-timeline',
   'project-timeline',
+  'what-if-planner',
 ];
 
 export function PlanningPage() {
@@ -66,7 +68,7 @@ export function PlanningPage() {
 
   return (
     <div>
-      <ViewHeader title="Planning & Resources" onProjectChange={handleProjectChange} onExport={() => setShowExport(true)} />
+      <ViewHeader title="Planning & Resources" onProjectChange={handleProjectChange} onExport={() => setShowExport(true)} pickerMode="forward" />
       <ExportConfigModal
         isOpen={showExport}
         onClose={() => setShowExport(false)}
@@ -126,6 +128,12 @@ export function PlanningPage() {
             </PanelErrorBoundary>
           </PanelWrapper>
         )}
+
+        <PanelWrapper id="what-if-planner" title="What-If Scenario Planner" className={FULL_WIDTH}>
+          <PanelErrorBoundary panelId="what-if-planner">
+            <WhatIfPlannerPanel />
+          </PanelErrorBoundary>
+        </PanelWrapper>
       </div>
     </div>
   );

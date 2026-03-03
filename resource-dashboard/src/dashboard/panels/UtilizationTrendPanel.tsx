@@ -15,6 +15,7 @@ import {
   Cell,
 } from 'recharts';
 import { AXIS_STYLE, GRID_STYLE, CHART_MARGINS } from '../../charts/ChartTheme';
+import { getEngineerCapacity } from '../../utils/capacity';
 
 export function UtilizationTrendPanel() {
   const { selectedEngineer } = useFilters();
@@ -55,10 +56,8 @@ export function UtilizationTrendPanel() {
     );
   }
 
-  const capacity =
-    member && member.capacity_override_hours > 0
-      ? member.capacity_override_hours
-      : (config?.std_monthly_capacity_hours ?? 140);
+  const stdCap = config?.std_monthly_capacity_hours ?? 140;
+  const capacity = member ? getEngineerCapacity(member, stdCap) : stdCap;
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;

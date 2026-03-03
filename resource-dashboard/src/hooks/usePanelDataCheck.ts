@@ -17,8 +17,9 @@ export function usePanelDataCheck(panelId: string): boolean {
     switch (panelId) {
 
       case 'skill-heatmap': {
-        const count = await db.skills.where('rating').above(0).count();
-        return count > 0;
+        // rating is not indexed — filter in JS
+        const skills = await db.skills.toArray();
+        return skills.some(s => s.rating > 0);
       }
 
       case 'milestone-timeline': {

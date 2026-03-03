@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
@@ -109,13 +108,9 @@ function TeamRoster({ onSelect }: { onSelect: (name: string) => void }) {
 function EngineerPageContent({
   engineer,
   onEngineerChange,
-  activityFilter,
-  onActivityChange,
 }: {
   engineer: string | undefined;
   onEngineerChange: (name: string) => void;
-  activityFilter: string;
-  onActivityChange: (activity: string) => void;
 }) {
   const navigate = useNavigate();
   const showSkillHeatmap = usePanelDataCheck('skill-heatmap');
@@ -132,9 +127,6 @@ function EngineerPageContent({
         showEngineerFilter
         engineerValue={engineer ?? ''}
         onEngineerChange={onEngineerChange}
-        showActivityFilter={!!engineer}
-        activityValue={activityFilter}
-        onActivityChange={onActivityChange}
       />
 
       {engineer ? (
@@ -146,10 +138,7 @@ function EngineerPageContent({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <PanelWrapper id="hours-by-activity" title="Hours by Activity">
               <PanelErrorBoundary panelId="hours-by-activity">
-                <HoursByActivityPanel
-                  activityFilter={activityFilter}
-                  onActivityChange={onActivityChange}
-                />
+                <HoursByActivityPanel />
               </PanelErrorBoundary>
             </PanelWrapper>
 
@@ -165,7 +154,6 @@ function EngineerPageContent({
             <PanelWrapper id="project-portfolio" title="Project Portfolio">
               <PanelErrorBoundary panelId="project-portfolio">
                 <ProjectPortfolioPanel
-                  activityFilter={activityFilter}
                   onProjectClick={handleProjectClick}
                 />
               </PanelErrorBoundary>
@@ -233,12 +221,10 @@ function EngineerPageContent({
 export function EngineerPage() {
   const { fullName } = useParams<{ fullName?: string }>();
   const navigate = useNavigate();
-  const [activityFilter, setActivityFilter] = useState('');
 
   const engineer = fullName ? decodeURIComponent(fullName) : undefined;
 
   const handleEngineerChange = (name: string) => {
-    setActivityFilter(''); // reset activity when switching engineers
     if (name) {
       navigate(`/dashboard/engineer/${encodeURIComponent(name)}`, { replace: true });
     } else {
@@ -251,8 +237,6 @@ export function EngineerPage() {
       <EngineerPageContent
         engineer={engineer}
         onEngineerChange={handleEngineerChange}
-        activityFilter={activityFilter}
-        onActivityChange={setActivityFilter}
       />
     </EngineerViewProvider>
   );

@@ -16,6 +16,9 @@ import type {
   KPISnapshot,
   AnomalySnapshot,
   WeeklyUpdate,
+  PlanningScenario,
+  ScenarioAllocation,
+  ScenarioSnapshot,
 } from '../types';
 import { DEFAULT_KPI_CARDS } from '../aggregation/kpiRegistry';
 
@@ -54,6 +57,9 @@ class DashboardDB extends Dexie {
   kpiHistory!: Table<KPISnapshot, number>;
   anomalyHistory!: Table<AnomalySnapshot, number>;
   weeklyUpdates!: Table<WeeklyUpdate, number>;
+  planningScenarios!: Table<PlanningScenario, number>;
+  scenarioAllocations!: Table<ScenarioAllocation, number>;
+  scenarioSnapshots!: Table<ScenarioSnapshot, number>;
 
   constructor() {
     super('ResourceDashboard');
@@ -220,6 +226,29 @@ class DashboardDB extends Dexie {
       kpiHistory: '++id, [month+project_filter], month, project_filter, computed_at',
       anomalyHistory: '++id, [month+project_filter], month, project_filter',
       weeklyUpdates: '++id, &[project_id+week_ending], project_id, week_ending',
+    });
+
+    // Version 10: Add what-if scenario planning tables
+    this.version(10).stores({
+      timesheets: 'timesheet_entry_id, date, person, full_name, activity, r_number, team, month, week, person_id, project_id, task_id',
+      teamMembers: 'person_id, person, full_name, role',
+      projects: 'project_id, type, work_class',
+      milestones: 'project_id',
+      plannedAllocations: '++id, [month+project_id+engineer], month, project_id, engineer',
+      plannedProjectMonths: '++id, [month+project_id], month, project_id',
+      config: 'id',
+      importLogs: '++id, imported_at, filename',
+      skills: '++id, [engineer+skill], engineer, skill',
+      skillCategories: 'name, sort_order',
+      projectSkillRequirements: '++id, [project_id+skill], project_id, skill',
+      anomalyThresholds: 'ruleId',
+      narrativeConfig: 'id',
+      kpiHistory: '++id, [month+project_filter], month, project_filter, computed_at',
+      anomalyHistory: '++id, [month+project_filter], month, project_filter',
+      weeklyUpdates: '++id, &[project_id+week_ending], project_id, week_ending',
+      planningScenarios: '++id, status, created_at',
+      scenarioAllocations: '++id, [scenario_id+month+project_id+engineer], scenario_id, month, engineer',
+      scenarioSnapshots: '++id, scenario_id, computed_at',
     });
   }
 }
